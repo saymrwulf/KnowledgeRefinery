@@ -14,7 +14,8 @@ ContentAtom                 │
     ▼ (split into)          │
 Chunk ──────────────────────┤
     │                       │
-    ├──▶ Vector (LanceDB)   │
+    ├──▶ Vector (SQLite)    │
+    │    768-dim BLOB       │
     │                       │
     ├──▶ Annotation         │
     │    (versioned)        │
@@ -26,7 +27,7 @@ Chunk ──────────────────────┤
     (hierarchical)
 ```
 
-## Tables
+## Tables (SQLite)
 
 ### file_assets
 Tracks every file in watched volumes. Status progresses through:
@@ -38,7 +39,21 @@ Each atom has an evidence_anchor linking to exact source location.
 
 ### chunks
 Deterministic text segments (500-800 tokens). IDs are stable across re-processing.
-Linked to LanceDB vectors via embedding_id.
+Linked to vectors in `chunk_vectors` table via chunk ID.
+
+### chunk_vectors
+Embedding vectors stored as binary BLOBs (768 x float32 = 3072 bytes per vector).
+Loaded into memory at startup for brute-force cosine similarity search.
+
+| Field | Type | Description |
+|-------|------|-------------|
+| id | TEXT PRIMARY KEY | Matches chunks.id |
+| vector | BLOB | 768-dim float32 embedding |
+| text | TEXT | Chunk text |
+| asset_id | TEXT | Source file |
+| asset_path | TEXT | File path |
+| evidence_anchor | TEXT | JSON anchor |
+| pipeline_version | TEXT | Version tag |
 
 ### annotations
 LLM-generated structured metadata per chunk. **Never overwritten** - new annotations
@@ -56,7 +71,7 @@ Each edge stores evidence references back to source chunks.
 ### pipeline_jobs
 Crash recovery: tracks job state so processing resumes after restart.
 
-## Live Progress State (M8, In-Memory)
+## Live Progress State (In-Memory)
 
 During pipeline execution, the daemon maintains ephemeral in-memory structures that are not persisted to SQLite:
 
@@ -74,19 +89,10 @@ Per-stage status object returned in the `live` field of `/ingest/status`:
 }
 ```
 
-Each stage transitions through `pending` -> `running` -> `done`.
-
 ### Activity Log Ring Buffer
-A fixed-size circular buffer (200 entries) that records pipeline events. The API returns the most recent 50 entries. Each entry contains a timestamp and message string:
-
-```json
-{"timestamp": "2026-02-12T10:30:03Z", "message": "Found 47 files, 12 new"}
-```
-
-The ring buffer prevents unbounded memory growth during long pipeline runs. It is reset at the start of each new pipeline execution.
+A fixed-size circular buffer (200 entries) that records pipeline events. The API returns the most recent 50 entries.
 
 ### Enriched Status Counters
-The `/ingest/status` response includes running totals updated as each stage completes:
 
 | Counter | Description |
 |---------|-------------|
@@ -111,17 +117,3 @@ Every derived artifact links back to source via JSON evidence anchors:
     "line_end": 58
 }
 ```
-
-## Vector Schema (LanceDB)
-
-| Field | Type | Description |
-|-------|------|-------------|
-| id | string | Matches chunks.id |
-| vector | float32[] | Embedding vector |
-| text | string | Chunk text |
-| asset_id | string | Source file |
-| asset_path | string | File path |
-| evidence_anchor | string | JSON anchor |
-| topics | string | Comma-separated topics |
-| atom_type | string | text/image/etc |
-| pipeline_version | string | Version tag |

@@ -687,7 +687,7 @@ h3 {
       <div class="stat"><div class="stat-num">0</div><div class="stat-label">Cloud Calls</div></div>
     </div>
     <div style="margin-top:2rem; color:var(--fg-subtle); font-size:0.85rem;">
-      macOS Tahoe &middot; SwiftUI &middot; Python 3.14 &middot; FastAPI &middot; LM Studio &middot; LanceDB &middot; WebGPU &middot; Multi-Workspace
+      macOS &middot; SwiftUI &middot; Go &middot; chi &middot; LM Studio &middot; SQLite &middot; WebGPU &middot; Multi-Workspace
     </div>
   </div>
 </div>
@@ -787,13 +787,13 @@ h3 {
         <span style="font-size:0.65rem; color:var(--fg-subtle);">127.0.0.1:8742</span>
       </div>
       <div class="arch-box" style="border-color:#7c3aed;">
-        <h4 style="color:#7c3aed;">&#x2699;&#xFE0F; Python Daemon</h4>
+        <h4 style="color:#7c3aed;">&#x2699;&#xFE0F; Go Daemon</h4>
         <div style="font-size:0.85rem; color:var(--fg-muted);">
-          <strong>FastAPI</strong> server with CORS<br>
+          <strong>chi</strong> router with CORS<br>
           <strong>6-Stage Pipeline</strong> orchestrator<br>
-          <strong>SQLite</strong> metadata + graph (WAL mode)<br>
-          <strong>LanceDB</strong> embedded vector store<br>
-          <strong>7 Extractors</strong> + sandbox worker
+          <strong>SQLite</strong> metadata + vectors + graph (WAL)<br>
+          <strong>11MB</strong> single binary, zero deps<br>
+          <strong>7 Extractors</strong> + fallback chain
         </div>
       </div>
     </div>
@@ -805,7 +805,7 @@ h3 {
       <div class="arch-box" style="border-color:#059669;">
         <h4 style="color:#059669;">&#x1F916; LM Studio</h4>
         <div style="font-size:0.85rem; color:var(--fg-muted);">
-          <strong>gemma-3-4b</strong> &mdash; Chat / Annotation<br>
+          <strong>qwen3-4b-2507</strong> &mdash; Chat / Annotation<br>
           <strong>nomic-embed-text-v1.5</strong> &mdash; Embeddings<br>
           Running on 127.0.0.1:1234
         </div>
@@ -844,7 +844,7 @@ h3 {
       <div class="pipeline-stage">
         <div class="num" style="background:#0891b2;">4</div>
         <span class="label">Embed</span>
-        <span class="desc">768-dim vectors via nomic-embed-text stored in LanceDB</span>
+        <span class="desc">768-dim vectors via nomic-embed-text stored in SQLite</span>
       </div>
       <div class="pipeline-arrow">&rarr;</div>
       <div class="pipeline-stage">
@@ -877,7 +877,7 @@ h3 {
       <div class="extractor-item">
         <div class="ext-icon">&#x1F4D1;</div>
         <div class="ext-name">PDF</div>
-        <div class="ext-types">.pdf &middot; Per-page text &middot; PyMuPDF</div>
+        <div class="ext-types">.pdf &middot; Per-page text &middot; pdftotext</div>
         <div><span class="tag tag-accent" style="font-size:0.6rem;">Priority 20</span></div>
       </div>
       <div class="extractor-item">
@@ -895,7 +895,7 @@ h3 {
       <div class="extractor-item">
         <div class="ext-icon">&#x1FA7B;</div>
         <div class="ext-name">DICOM</div>
-        <div class="ext-types">.dcm &middot; Medical metadata &middot; Optional pydicom</div>
+        <div class="ext-types">.dcm &middot; Medical metadata &middot; Binary header parsing</div>
         <div><span class="tag tag-accent" style="font-size:0.6rem;">Priority 15</span></div>
       </div>
       <div class="extractor-item">
@@ -1076,7 +1076,7 @@ ContentAtom <span class="comment">-- text/image/table/metadata</span>
   <span class="op">&darr;</span> <span class="comment">(split into)</span>
 Chunk <span class="comment">-- deterministic ID, 500-800 tokens</span>
   <span class="op">&darr;</span>
-  <span class="op">├──&gt;</span> Vector <span class="comment">(LanceDB, 768-dim)</span>
+  <span class="op">├──&gt;</span> Vector <span class="comment">(SQLite BLOB, 768-dim)</span>
   <span class="op">├──&gt;</span> Annotation <span class="comment">(versioned, immutable)</span>
   <span class="op">└──&gt;</span> GraphEdge
          <span class="op">&darr;</span>
@@ -1096,8 +1096,7 @@ Chunk <span class="comment">-- deterministic ID, 500-800 tokens</span>
 }</div>
         <h3 style="margin-top:1rem;">Storage</h3>
         <table class="data-table" style="font-size:0.8rem;">
-          <tr><td><strong>SQLite</strong></td><td>Metadata, graph, jobs (WAL mode)</td></tr>
-          <tr><td><strong>LanceDB</strong></td><td>Vectors + payload (embedded)</td></tr>
+          <tr><td><strong>SQLite</strong></td><td>Metadata, vectors (BLOB), graph, jobs (WAL mode)</td></tr>
           <tr><td><strong>Disk</strong></td><td>~/.knowledge-refinery/</td></tr>
         </table>
       </div>
@@ -1165,7 +1164,7 @@ Chunk <span class="comment">-- deterministic ID, 500-800 tokens</span>
       <div class="card">
         <div class="icon violet">&#x1F4E6;</div>
         <h3>Multi-Workspace</h3>
-        <p>Each workspace gets its own data directory, daemon port (8742, 8743, ...), SQLite database, and LanceDB vector store. Independent lifecycle management.</p>
+        <p>Each workspace gets its own data directory, daemon port (8742, 8743, ...), and SQLite database (metadata + vectors + graph). Independent lifecycle management.</p>
       </div>
       <div class="card">
         <div class="icon blue">&#x1F5FA;</div>
@@ -1213,18 +1212,18 @@ Chunk <span class="comment">-- deterministic ID, 500-800 tokens</span>
         <table class="data-table" style="margin-bottom:1.5rem;">
           <tr><td><strong>macOS</strong></td><td>Tahoe (26.x) on Apple Silicon</td></tr>
           <tr><td><strong>Xcode</strong></td><td>26.x or Command Line Tools</td></tr>
-          <tr><td><strong>Python</strong></td><td>3.12+ (system or python.org)</td></tr>
+          <tr><td><strong>Go</strong></td><td>1.22+ (from go.dev or Homebrew)</td></tr>
           <tr><td><strong>LM Studio</strong></td><td>From lmstudio.ai (free)</td></tr>
         </table>
         <h3>What the Installer Does</h3>
         <ol class="step-list">
           <li>
             <strong>Checks prerequisites</strong>
-            <p>Validates macOS version, architecture, Xcode tools, Swift, and Python version.</p>
+            <p>Validates macOS version, architecture, Xcode tools, Swift, and Go version.</p>
           </li>
           <li>
-            <strong>Creates Python venv</strong>
-            <p>Isolated <code>.venv</code> with all dependencies: FastAPI, LanceDB, PyMuPDF, tiktoken, NumPy.</p>
+            <strong>Builds Go daemon</strong>
+            <p>Compiles the Go daemon into a single 17MB binary with zero runtime dependencies.</p>
           </li>
           <li>
             <strong>Builds the .app bundle</strong>
@@ -1260,10 +1259,7 @@ Knowledge Refinery.app/
       KnowledgeRefinery      <span class="comment"># launcher</span>
       KnowledgeRefinery-bin  <span class="comment"># Swift binary</span>
     Resources/
-      daemon/                <span class="comment"># Python source</span>
-        knowledge_refinery/
-        pyproject.toml
-        shared/
+      knowledge-refinery-daemon <span class="comment"># Go binary (17MB)</span>
       WebGPU/                <span class="comment"># 3D renderer</span>
         universe.html/js/wgsl</div>
       </div>
@@ -1350,7 +1346,7 @@ Knowledge Refinery.app/
           <div style="color:var(--fg-subtle); padding-left:2.3rem;">&darr;</div>
           <div style="display:flex; align-items:center; gap:0.75rem;">
             <span style="background:#7c3aed; color:white; width:24px; height:24px; border-radius:50%; display:inline-flex; align-items:center; justify-content:center; font-size:0.7rem; font-weight:700; flex-shrink:0;">3</span>
-            LanceDB cosine similarity search
+            Brute-force cosine similarity search (in-memory vectors)
           </div>
           <div style="color:var(--fg-subtle); padding-left:2.3rem;">&darr;</div>
           <div style="display:flex; align-items:center; gap:0.75rem;">
@@ -1449,20 +1445,20 @@ Knowledge Refinery.app/
         </table>
       </div>
       <div>
-        <h3>Backend (Python Daemon)</h3>
+        <h3>Backend (Go Daemon)</h3>
         <table class="data-table">
-          <tr><td><strong>Runtime</strong></td><td>Python 3.14.2 (venv isolated)</td></tr>
-          <tr><td><strong>Web Server</strong></td><td>FastAPI + Uvicorn</td></tr>
-          <tr><td><strong>Vector Store</strong></td><td>LanceDB (embedded, no server)</td></tr>
-          <tr><td><strong>Metadata</strong></td><td>SQLite 3 (WAL mode)</td></tr>
-          <tr><td><strong>LLM Client</strong></td><td>OpenAI SDK &rarr; LM Studio</td></tr>
-          <tr><td><strong>PDF</strong></td><td>PyMuPDF (fitz)</td></tr>
-          <tr><td><strong>Tokenizer</strong></td><td>tiktoken (cl100k_base)</td></tr>
-          <tr><td><strong>Math</strong></td><td>NumPy (clustering, kNN)</td></tr>
+          <tr><td><strong>Language</strong></td><td>Go 1.22+ (single 17MB binary)</td></tr>
+          <tr><td><strong>HTTP Router</strong></td><td>chi/v5 + CORS middleware</td></tr>
+          <tr><td><strong>Storage</strong></td><td>SQLite (metadata + vectors + graph, WAL mode)</td></tr>
+          <tr><td><strong>SQLite Driver</strong></td><td>modernc.org/sqlite (pure Go, no CGo)</td></tr>
+          <tr><td><strong>LLM Client</strong></td><td>net/http &rarr; LM Studio</td></tr>
+          <tr><td><strong>PDF</strong></td><td>pdftotext (poppler-utils)</td></tr>
+          <tr><td><strong>Tokenizer</strong></td><td>tiktoken-go (cl100k_base)</td></tr>
+          <tr><td><strong>Math</strong></td><td>Pure Go (k-means++, cosine sim)</td></tr>
         </table>
         <h3 style="margin-top:1.5rem;">LM Studio Models</h3>
         <table class="data-table">
-          <tr><td><strong>Chat</strong></td><td>google/gemma-3-4b</td></tr>
+          <tr><td><strong>Chat</strong></td><td>qwen3-4b-2507</td></tr>
           <tr><td><strong>Embeddings</strong></td><td>nomic-embed-text-v1.5 (768-dim)</td></tr>
         </table>
       </div>
@@ -1481,15 +1477,15 @@ Knowledge Refinery.app/
       Clone, install, launch &mdash; from raw documents to searchable knowledge in minutes.
     </p>
     <div class="stats-row" style="justify-content:center; margin-bottom:2.5rem;">
-      <div class="stat"><div class="stat-num">30</div><div class="stat-label">Tests Passing</div></div>
+      <div class="stat"><div class="stat-num">97</div><div class="stat-label">Tests Passing</div></div>
       <div class="stat"><div class="stat-num">0</div><div class="stat-label">Compiler Warnings</div></div>
-      <div class="stat"><div class="stat-num">~55</div><div class="stat-label">Source Files</div></div>
+      <div class="stat"><div class="stat-num">~90</div><div class="stat-label">Source Files</div></div>
       <div class="stat"><div class="stat-num">100%</div><div class="stat-label">Local</div></div>
     </div>
     <div style="display:flex; gap:1rem; justify-content:center; flex-wrap:wrap; font-size:0.82rem;">
-      <div class="badge" style="background:var(--accent-bg); color:var(--accent);">&#x1F4C1; daemon/knowledge_refinery/</div>
+      <div class="badge" style="background:var(--accent-bg); color:var(--accent);">&#x1F4C1; daemon-go/</div>
       <div class="badge" style="background:#f5f3ff; color:#7c3aed;">&#x1F4F1; apps/macos/KnowledgeRefinery/</div>
-      <div class="badge" style="background:#ecfdf5; color:#059669;">&#x1F9EA; daemon/tests/</div>
+      <div class="badge" style="background:#ecfdf5; color:#059669;">&#x1F9EA; daemon-go/internal/*/</div>
       <div class="badge" style="background:#fffbeb; color:#d97706;">&#x1F6E0; scripts/install.sh</div>
     </div>
     <div style="margin-top:1.5rem;">
@@ -1497,7 +1493,7 @@ Knowledge Refinery.app/
 <span class="fn">git</span> clone &lt;repo&gt; &amp;&amp; <span class="keyword">cd</span> LongLocalTimeHorizonInfoRetrieval &amp;&amp; <span class="fn">make</span> install</div>
     </div>
     <div style="margin-top:1.5rem; color:var(--fg-subtle); font-size:0.8rem;">
-      Built with SwiftUI, Python, FastAPI, LanceDB, WebGPU, and local LLMs
+      Built with SwiftUI, Go, chi, SQLite, WebGPU, and local LLMs
     </div>
   </div>
 </div>
