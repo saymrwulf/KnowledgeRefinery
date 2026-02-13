@@ -13,12 +13,6 @@ struct KnowledgeRefineryApp: App {
     init() {
         // Ensure the app appears in the Dock and can become frontmost
         NSApplication.shared.setActivationPolicy(.regular)
-
-        // Set custom Dock icon from bundled .icns
-        if let iconURL = Bundle.module.url(forResource: "AppIcon", withExtension: "icns"),
-           let icon = NSImage(contentsOf: iconURL) {
-            NSApplication.shared.applicationIconImage = icon
-        }
     }
 
     var body: some Scene {
@@ -28,6 +22,7 @@ struct KnowledgeRefineryApp: App {
                 .environmentObject(lmMonitor)
                 .frame(minWidth: 900, minHeight: 600)
                 .onAppear {
+                    setAppIcon()
                     autoStartDaemons()
                     runSelfTestIfRequested()
                 }
@@ -54,6 +49,14 @@ struct KnowledgeRefineryApp: App {
             }
         }
         .defaultSize(width: 1300, height: 850)
+    }
+
+    /// Set the Dock icon from the bundled .icns file.
+    private func setAppIcon() {
+        if let iconURL = Bundle.module.url(forResource: "AppIcon", withExtension: "icns") {
+            let icon = NSImage(contentsOf: iconURL)
+            NSApp.applicationIconImage = icon
+        }
     }
 
     /// Auto-start daemons for all workspaces on app launch.
