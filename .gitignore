@@ -1,0 +1,49 @@
+# Python
+__pycache__/
+*.py[cod]
+*.egg-info/
+.venv/
+venv/
+*.egg
+
+# Go
+daemon-go/knowledge-refinery-daemon
+
+# Swift / SPM
+.build/
+.swiftpm/
+Package.resolved
+
+# macOS
+.DS_Store
+*.xcuserdata
+xcuserdata/
+DerivedData/
+*.xcworkspace
+!*.xcodeproj/project.pbxproj
+
+# IDE
+.idea/
+.vscode/
+*.swp
+*.swo
+
+# Claude Code
+.claude/
+
+# Knowledge Refinery data
+data/
+*.lance/
+*.db
+*.sqlite
+
+# Secrets
+.env
+*.pem
+*.key
+
+# Test artifacts
+test_output/
+
+# Dist / build artifacts
+dist/
