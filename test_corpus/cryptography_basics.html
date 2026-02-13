@@ -1,0 +1,26 @@
+<!DOCTYPE html>
+<html>
+<head><title>Cryptography Basics</title></head>
+<body>
+<h1>Introduction to Cryptography</h1>
+
+<p>Cryptography is the practice and study of techniques for secure communication in the presence of adversarial behavior. It is about constructing and analyzing protocols that prevent third parties from reading private messages.</p>
+
+<h2>Symmetric Encryption</h2>
+<p>In symmetric encryption, the same key is used for both encryption and decryption. This is the fastest form of encryption but requires secure key exchange. Common algorithms include AES (Advanced Encryption Standard), which is the current standard for symmetric encryption, and ChaCha20, which is popular in mobile and embedded applications.</p>
+
+<p>AES operates on fixed-size blocks of 128 bits and supports key sizes of 128, 192, and 256 bits. AES-256 is considered secure against quantum computing attacks and is used extensively in government and military applications.</p>
+
+<h2>Asymmetric Encryption</h2>
+<p>Asymmetric encryption uses a pair of keys: a public key for encryption and a private key for decryption. RSA, introduced in 1977 by Rivest, Shamir, and Adleman, was one of the first practical public-key cryptosystems. Elliptic Curve Cryptography (ECC) provides equivalent security with smaller key sizes.</p>
+
+<h2>Hash Functions</h2>
+<p>Cryptographic hash functions produce a fixed-size output from arbitrary input. Properties include: deterministic output, fast computation, pre-image resistance, small change in input produces completely different output (avalanche effect), and collision resistance. SHA-256 and SHA-3 are widely used hash functions.</p>
+
+<h2>Digital Signatures</h2>
+<p>Digital signatures provide authentication, integrity, and non-repudiation. The signer uses their private key to create a signature, and anyone can verify it using the corresponding public key. EdDSA (Ed25519) and ECDSA are modern signature schemes.</p>
+
+<h2>Post-Quantum Cryptography</h2>
+<p>With the advancement of quantum computing, many current cryptographic systems may become vulnerable. NIST has been standardizing post-quantum cryptographic algorithms, including lattice-based (CRYSTALS-Kyber, CRYSTALS-Dilithium), hash-based (SPHINCS+), and code-based schemes. Organizations should begin planning their migration to quantum-resistant algorithms.</p>
+</body>
+</html>

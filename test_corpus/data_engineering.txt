@@ -1,0 +1,44 @@
+Data Engineering: Building Reliable Data Pipelines
+
+Data engineering is the practice of designing and building systems for collecting, storing, and analyzing data at scale. Data engineers are responsible for the infrastructure and architecture that enables data scientists and analysts to work effectively.
+
+ETL vs ELT
+
+Traditional data pipelines follow the ETL pattern: Extract, Transform, Load. Data is extracted from source systems, transformed into a suitable format, and loaded into a target system (usually a data warehouse). Modern approaches often use ELT, where raw data is loaded first and transformed within the target system, leveraging the compute power of modern cloud data warehouses.
+
+Data Quality
+
+Ensuring data quality is one of the most critical aspects of data engineering. Key dimensions of data quality include:
+
+- Accuracy: Does the data correctly represent the real-world values?
+- Completeness: Is all required data present?
+- Consistency: Is the data consistent across different sources?
+- Timeliness: Is the data up-to-date?
+- Uniqueness: Are there no duplicate records?
+
+Implementing data quality checks, validation rules, and monitoring systems is essential for maintaining trustworthy data pipelines.
+
+Stream Processing
+
+While batch processing handles data in large groups at scheduled intervals, stream processing deals with data in real-time as it arrives. Technologies like Apache Kafka, Apache Flink, and Apache Pulsar enable stream processing at scale.
+
+Stream processing is essential for use cases requiring low-latency data:
+- Real-time fraud detection
+- Live dashboards and monitoring
+- IoT sensor data processing
+- Event-driven architectures
+
+Data Lakehouse Architecture
+
+The data lakehouse combines the best features of data lakes and data warehouses. It provides the schema enforcement and ACID transactions of a warehouse with the flexible, low-cost storage of a data lake. Technologies like Delta Lake, Apache Iceberg, and Apache Hudi implement this pattern.
+
+Incremental Processing
+
+For large-scale data systems, reprocessing all data on every run is impractical. Incremental processing uses techniques like change data capture (CDC), watermarks, and content hashing to identify and process only new or changed data. This approach dramatically reduces processing time and resource consumption.
+
+Key principles of incremental processing:
+1. Track data lineage and provenance
+2. Use deterministic processing for reproducibility
+3. Maintain idempotent operations (safe to retry)
+4. Version all transformations and models
+5. Build in crash recovery and checkpoint mechanisms

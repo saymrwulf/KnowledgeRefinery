@@ -1,0 +1,234 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Concept Universe</title>
+<style>
+    /* --------------------------------------------------------
+       Base reset and layout
+       -------------------------------------------------------- */
+    *, *::before, *::after {
+        margin: 0;
+        padding: 0;
+        box-sizing: border-box;
+    }
+
+    html, body {
+        width: 100%;
+        height: 100%;
+        overflow: hidden;
+        background: #0a0a14;
+        font-family: -apple-system, BlinkMacSystemFont, "SF Pro Text",
+                     "Helvetica Neue", Helvetica, Arial, sans-serif;
+        color: #e0e0e8;
+        -webkit-font-smoothing: antialiased;
+        user-select: none;
+        -webkit-user-select: none;
+    }
+
+    /* --------------------------------------------------------
+       Canvas
+       -------------------------------------------------------- */
+    #gpu-canvas {
+        width: 100%;
+        height: 100%;
+        display: block;
+        cursor: grab;
+    }
+
+    #gpu-canvas:active {
+        cursor: grabbing;
+    }
+
+    /* --------------------------------------------------------
+       Fallback (shown when WebGPU is unavailable)
+       -------------------------------------------------------- */
+    #fallback {
+        display: none; /* shown via JS if needed */
+        position: absolute;
+        inset: 0;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+        background: #0a0a14;
+        color: #888;
+        z-index: 100;
+    }
+
+    #fallback .icon {
+        font-size: 48px;
+        margin-bottom: 16px;
+        opacity: 0.5;
+    }
+
+    #fallback-message {
+        font-size: 16px;
+        text-align: center;
+        max-width: 400px;
+        line-height: 1.5;
+    }
+
+    #fallback .hint {
+        margin-top: 12px;
+        font-size: 13px;
+        color: #555;
+    }
+
+    /* --------------------------------------------------------
+       HUD Overlay
+       -------------------------------------------------------- */
+    #hud {
+        position: absolute;
+        top: 0;
+        left: 0;
+        right: 0;
+        pointer-events: none;
+        z-index: 10;
+        display: flex;
+        justify-content: space-between;
+        align-items: flex-start;
+        padding: 12px 16px;
+    }
+
+    .hud-group {
+        display: flex;
+        flex-direction: column;
+        gap: 4px;
+    }
+
+    .hud-badge {
+        display: inline-flex;
+        align-items: center;
+        gap: 6px;
+        background: rgba(10, 10, 20, 0.75);
+        backdrop-filter: blur(8px);
+        -webkit-backdrop-filter: blur(8px);
+        border: 1px solid rgba(255, 255, 255, 0.08);
+        border-radius: 6px;
+        padding: 5px 10px;
+        font-size: 12px;
+        font-weight: 500;
+        letter-spacing: 0.3px;
+        color: #b0b0c0;
+        font-variant-numeric: tabular-nums;
+    }
+
+    .hud-badge .label {
+        color: #666;
+        font-size: 10px;
+        text-transform: uppercase;
+        letter-spacing: 0.8px;
+    }
+
+    .hud-badge .value {
+        color: #d0d0e0;
+    }
+
+    .hud-badge.lod-macro .value { color: #6ec6ff; }
+    .hud-badge.lod-mid   .value { color: #a0e06c; }
+    .hud-badge.lod-near  .value { color: #ffb060; }
+
+    /* --------------------------------------------------------
+       Tooltip
+       -------------------------------------------------------- */
+    #tooltip {
+        display: none;
+        position: absolute;
+        pointer-events: none;
+        z-index: 20;
+        background: rgba(20, 20, 35, 0.92);
+        backdrop-filter: blur(12px);
+        -webkit-backdrop-filter: blur(12px);
+        border: 1px solid rgba(255, 255, 255, 0.12);
+        border-radius: 6px;
+        padding: 6px 10px;
+        font-size: 13px;
+        color: #e8e8f0;
+        white-space: nowrap;
+        max-width: 300px;
+        overflow: hidden;
+        text-overflow: ellipsis;
+        box-shadow: 0 4px 16px rgba(0, 0, 0, 0.5);
+    }
+
+    /* --------------------------------------------------------
+       Controls hint (bottom)
+       -------------------------------------------------------- */
+    #controls-hint {
+        position: absolute;
+        bottom: 12px;
+        left: 50%;
+        transform: translateX(-50%);
+        pointer-events: none;
+        z-index: 10;
+        display: flex;
+        gap: 16px;
+        background: rgba(10, 10, 20, 0.6);
+        backdrop-filter: blur(8px);
+        -webkit-backdrop-filter: blur(8px);
+        border: 1px solid rgba(255, 255, 255, 0.06);
+        border-radius: 8px;
+        padding: 6px 14px;
+        font-size: 11px;
+        color: #666;
+        transition: opacity 0.3s;
+    }
+
+    #controls-hint .key {
+        color: #888;
+        font-weight: 600;
+    }
+</style>
+</head>
+<body>
+
+<!-- WebGPU Canvas -->
+<canvas id="gpu-canvas"></canvas>
+
+<!-- Fallback message -->
+<div id="fallback">
+    <div class="icon">&#9888;</div>
+    <div id="fallback-message">
+        WebGPU is not available.<br>
+        This renderer requires Safari 26+ on macOS Tahoe or a WebGPU-capable browser.
+    </div>
+    <div class="hint">Try enabling WebGPU in your browser's experimental features.</div>
+</div>
+
+<!-- HUD Overlay -->
+<div id="hud">
+    <div class="hud-group">
+        <div class="hud-badge">
+            <span class="label">Nodes</span>
+            <span class="value" id="node-count">0 / 0</span>
+        </div>
+        <div class="hud-badge">
+            <span class="label">LOD</span>
+            <span class="value" id="lod-level">--</span>
+        </div>
+    </div>
+    <div class="hud-group">
+        <div class="hud-badge">
+            <span class="label">FPS</span>
+            <span class="value" id="fps">--</span>
+        </div>
+    </div>
+</div>
+
+<!-- Tooltip (follows mouse on hover) -->
+<div id="tooltip"></div>
+
+<!-- Controls hint -->
+<div id="controls-hint">
+    <span><span class="key">Drag</span> Orbit</span>
+    <span><span class="key">Scroll</span> Zoom</span>
+    <span><span class="key">Right-drag</span> Pan</span>
+    <span><span class="key">Click</span> Focus</span>
+</div>
+
+<!-- Universe renderer script -->
+<script src="universe.js"></script>
+
+</body>
+</html>

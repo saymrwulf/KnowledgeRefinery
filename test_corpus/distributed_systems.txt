@@ -1,0 +1,52 @@
+Distributed Systems: Fundamental Concepts
+
+A distributed system is a collection of autonomous computing elements that appears to its users as a single coherent system. The key challenges in distributed systems revolve around consistency, availability, and partition tolerance, as described by the CAP theorem.
+
+CAP Theorem
+
+The CAP theorem, formulated by Eric Brewer in 2000, states that a distributed data store can only provide two of the following three guarantees:
+- Consistency: Every read receives the most recent write
+- Availability: Every request receives a response
+- Partition tolerance: The system continues to operate despite network partitions
+
+In practice, since network partitions are inevitable, the real choice is between consistency and availability during a partition event.
+
+Consensus Algorithms
+
+Achieving consensus among distributed nodes is fundamental. Key algorithms include:
+
+Paxos: Developed by Leslie Lamport in 1989, Paxos is a family of protocols for solving consensus. It is known for being correct but difficult to implement and understand.
+
+Raft: Developed by Diego Ongaro and John Ousterhout in 2014, Raft was designed to be more understandable than Paxos while providing the same guarantees. It uses leader election and log replication.
+
+Byzantine Fault Tolerance: BFT protocols handle nodes that may behave arbitrarily (including maliciously). PBFT (Practical Byzantine Fault Tolerance) requires 3f+1 nodes to tolerate f faulty nodes.
+
+Eventual Consistency
+
+Many large-scale systems adopt eventual consistency, where replicas will converge to the same state given enough time without new updates. Amazon's Dynamo paper (2007) popularized this approach. CRDTs (Conflict-free Replicated Data Types) provide a mathematical framework for eventual consistency without coordination.
+
+Distributed Storage
+
+Modern distributed storage systems include:
+- Google File System (GFS) / HDFS: Designed for large sequential reads/writes
+- Apache Cassandra: Wide-column store, designed for high availability
+- CockroachDB: Distributed SQL, strongly consistent
+- etcd: Distributed key-value store used by Kubernetes for configuration
+
+Service Mesh and Microservices
+
+Microservice architectures decompose applications into small, independently deployable services. A service mesh like Istio or Linkerd provides:
+- Service discovery
+- Load balancing
+- Failure recovery
+- Metrics and monitoring
+- Mutual TLS authentication
+- Traffic management
+
+Clock Synchronization
+
+In distributed systems, maintaining a consistent notion of time is challenging. Solutions include:
+- NTP (Network Time Protocol): Best-effort synchronization
+- Logical clocks (Lamport timestamps): Capture causal ordering
+- Vector clocks: Track causality across multiple nodes
+- Google TrueTime: Hardware-assisted time with bounded uncertainty
